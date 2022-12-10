@@ -6,10 +6,15 @@ SDEV 300
 
 import re
 from datetime import datetime
+from waitress import serve
 from passlib.hash import pbkdf2_sha512
 from flask import Flask, render_template, url_for, redirect, request
 
 app = Flask(__name__)
+
+if __name__ == '__main__':
+    #app.run(host='0.0.0.0', port=80) 
+    serve(app, host='0.0.0.0', port=80)
 
 @app.route('/')
 def root():
