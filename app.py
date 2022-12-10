@@ -12,7 +12,9 @@ from flask import Flask, render_template, url_for, redirect, request
 application = Flask(__name__)
 
 if __name__ == "__main__":
-	application.run(host='0.0.0.0', port=8000)
+	application.jinja_env.auto_reload = True
+    application.config['TEMPLATES_AUTO_RELOAD'] = True
+    application.run(debug=True, host='0.0.0.0')
 
 @application.route('/')
 def root():
