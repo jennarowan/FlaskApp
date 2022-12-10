@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<title>Home</title> <!-- Browser tab name -->
+
+<header>
+    <h1>JRo's Liquor Extravaganza</h1> <!-- Sitewide header -->
+</header>
+
+<body>
+    <h2>Your destination for getting seriously messed up</h2>
+    <h3>(Please drink responsibly)</h3>
+    <h6>[Or not.  Check Useful Links for a good lawyer if needed.]</h6>
+
+    <!-- Navigation bar to the other pages -->
+    <a href="liquors">Liquors</a> ~ 
+    <a href="stores">Stores</a> ~ 
+    <a href="links">Useful Links</a> ~ 
+    <a href ="logout">Logout</a>
+
+    <p></p>
+
+    <img src={{ image_file }} alt="Liquor Store" width="960" height="590">
+ </div>
+
+    <h3>You accessed this page at {{ datetime }}</h3>
+
+</body>
+
+<footer class="page-footer">
+    <p>© 2022 Jenna Rowan</p>
+</footer>
+
+</html>

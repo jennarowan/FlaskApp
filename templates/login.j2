@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<title>Login</title> <!-- Browser tab name -->
+
+<header>
+    <h1>JRo's Liquor Extravaganza</h1> <!-- Sitewide header -->
+</header>
+
+<body>
+
+    <h1>Login</h1> <!-- Page header -->
+
+    <!-- Navigation bar to the other pages -->
+    <a href="/">Home</a>
+
+    <p></p>
+
+    <br>
+
+    <form method="post">
+
+        <input type="text" placeholder="Username" name="username" value="{{
+            request.form.username }}"><br><br>
+        <input type="password" placeholder="Password" name="password" value="{{
+            request.form.password }}"><br><br>
+        <input class="btn btn-default" type="submit" value="Login">
+
+    </form>
+
+    {% if error %}
+
+        <p class="error"><strong>Error:</strong> {{ error }}
+        
+    {% endif %}
+
+    <p></p>
+
+    <img src={{ image_file }} alt="Passwords, eh?" width="590" height="590">
+
+</body>
+
+<footer class="page-footer">
+    <p>© 2022 Jenna Rowan</p>
+</footer>
+
+</html>

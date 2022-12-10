@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<title>Stores</title> <!-- Browser tab name -->
+
+<header>
+    <h1>JRo's Liquor Extravaganza</h1> <!-- Sitewide header -->
+</header>
+
+<h1>Stores</h1> <!-- Page header -->
+
+<!-- Navigation bar to the other pages -->
+<a href="home">Home</a> ~ 
+<a href="liquors">Liquors</a> ~ 
+<a href="links">Useful Links</a> ~ 
+<a href ="logout">Logout</a>
+
+<body>
+
+    <table border="1" cellpadding="5">
+
+        <thead>
+
+            <tr>
+
+                <th>Street Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <!-- These are actually the real life homes of fictional characters... -->
+        
+            <tr>
+                <!-- Peter and Kate McCallister -->
+                <td>671 Lincoln Ave</td>
+                <td>Winnetka</td>
+                <td>IL</td>
+                <td>60093</td>
+
+            </tr>
+
+            <tr>
+                <!-- Danny Tanner -->
+                <td>1709 Broderick St</td>
+                <td>San Francisco</td>
+                <td>CA</td>
+                <td>94115</td>
+
+            </tr>
+
+            <tr>
+                <!-- Phillip and Vivian Banks -->
+                <td>251 N. Bristol Ave</td>
+                <td>Brentwood</td>
+                <td>CA</td>
+                <td>90049</td>
+
+            </tr>
+
+            <tr>
+                <!-- Lord and Lady Grantham -->
+                <td>Highclere Castle</td>
+                <td>Newbury</td>
+                <td>West Berkshire</td>
+                <td>UK</td>
+
+            </tr>
+        
+        </tbody>
+
+    </table>
+
+</body>
+
+<footer class="page-footer">
+    <p>© 2022 Jenna Rowan</p>
+</footer>
+
+</html>
