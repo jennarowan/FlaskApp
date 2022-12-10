@@ -10,10 +10,14 @@ from passlib.hash import pbkdf2_sha512
 from flask import Flask, render_template, url_for, redirect, request
 
 application = Flask(__name__)
+config = {
+    "DEBUG": True  # run app in debug mode
+}
+application.jinja_env.auto_reload = True
+application.config['TEMPLATES_AUTO_RELOAD'] = True
 
 if __name__ == "__main__":
-	application.jinja_env.auto_reload = True
-    application.config['TEMPLATES_AUTO_RELOAD'] = True
+	
     application.run(debug=True, host='0.0.0.0')
 
 @application.route('/')
