@@ -9,12 +9,12 @@ from datetime import datetime
 from passlib.hash import pbkdf2_sha512
 from flask import Flask, render_template, url_for, redirect, request
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 if __name__ == "__main__":
-	app.run()
+	application.run(host='0.0.0.0', port=8000)
 
-@app.route('/')
+@application.route('/')
 def root():
 
     '''
@@ -26,7 +26,7 @@ def root():
     return render_template("index.j2", image_file=image_file, \
         datetime = str(datetime.now()))
 
-@app.route('/home')
+@application.route('/home')
 def home():
 
     '''
@@ -39,7 +39,7 @@ def home():
     return render_template("home.j2", image_file=image_file, \
         datetime = str(datetime.now()))
 
-@app.route('/register', methods=['GET', 'POST'])
+@application.route('/register', methods=['GET', 'POST'])
 def register():
 
     '''
@@ -108,7 +108,7 @@ def register():
 
     return redirect(url_for('home'))
 
-@app.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
 
     '''
@@ -241,7 +241,7 @@ def check_complexity(password):
 
     return error
 
-@app.route('/logout')
+@application.route('/logout')
 def logout():
 
     '''
@@ -250,7 +250,7 @@ def logout():
 
     return redirect('/')
 
-@app.route('/liquors')
+@application.route('/liquors')
 def liquors():
 
     '''
@@ -259,7 +259,7 @@ def liquors():
 
     return render_template("liquors.j2")
 
-@app.route('/stores')
+@application.route('/stores')
 def stores():
 
     '''
@@ -268,7 +268,7 @@ def stores():
 
     return render_template("stores.j2")
 
-@app.route('/links')
+@application.route('/links')
 def links():
 
     '''
