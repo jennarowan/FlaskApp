@@ -106,7 +106,7 @@ def register():
     # Open credentials file and write the username and password
     with open('passfile.txt', "a", encoding="utf-8") as file:
 
-        file.writelines("\n" + username + "," + password)
+        file.writelines(f"\n{username},{password}")
 
     return redirect(url_for('home'))
 
