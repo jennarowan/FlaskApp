@@ -82,90 +82,37 @@ def register():
 
     if form.validate_on_submit():
 
-        # Grabs the information the user entered
-        user = User(username = form.username.data)
-        user.set_password(form.password1.data)
+        # Checks to ensure username is not taken
+        exists = User.query.filter_by(username = form.username.data).first() \
+            is not None
 
-        # Adds it to the database
-        db.session.add(user)
-        db.session.commit()
+        if exists:
 
-        # Logs the user in and returns them to the newly wide open
-        # homepage
-        login_user(user)
-        next = request.args.get("next")
-        return redirect(next or url_for('home'))
+            error = "This username is already taken"
+
+        else:
+
+            # Checks validity of password
+            error = check_complexity(form.password1.data)
+
+            if not error:
+
+                # Grabs the information the user entered
+                user = User(username = form.username.data)
+                user.set_password(form.password1.data)
+
+                # Adds it to the database
+                db.session.add(user)
+                db.session.commit()
+
+                # Logs the user in and returns them to the newly wide open
+                # homepage
+                login_user(user)
+                next = request.args.get("next")
+                return redirect(next or url_for('home'))
 
     return render_template('register.j2', form=form, image_file=image_file, \
         error=error)
-
-# def register():
-
-#     '''
-#     This function renders the user registration page.
-#     '''
-
-#     # Relevant
-#     image_file = url_for('static', filename="password_strength.png")
-
-#     if request.method == 'GET':
-
-#         return render_template('register.j2', image_file=image_file)
-
-#     error = None
-
-#     if request.method == 'POST':
-
-#         # Grabs the data the user filled in
-#         username = request.form['username']
-#         password = request.form['password']
-#         passwordtwo = request.form['passwordtwo']
-
-#         # Finds common errors, sasses user
-#         if not username:
-
-#             error = 'Please enter your Username.'
-
-#         elif not password:
-
-#             error = 'Please enter your Password.'
-
-#         elif not passwordtwo:
-
-#             error = "Both password fields must be filled out."
-
-#         elif password != passwordtwo:
-
-#             error = "Passwords do not match."
-
-#         # Determines if username is taken already with subsidiary function
-#         elif not check_not_reg(username):
-
-#             error = 'This username is taken.'
-
-#         # Determines password matches complexity requirements with subsidiary
-#         # function
-#         else:
-
-#             error = check_complexity(password)
-
-#         # They get to try again
-#         if error:
-
-#             return render_template('register.j2', error=error, \
-#                 image_file=image_file)
-
-#     # Success
-
-#     # Hash the password
-#     password = pbkdf2_sha512.hash(password)
-
-#     # Open credentials file and write the username and password
-#     with open('passfile.txt', "a", encoding="utf-8") as file:
-
-#         file.writelines(f"\n{username},{password}")
-
-#     return redirect(url_for('home'))
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -202,105 +149,6 @@ def login():
 
     return render_template('login.j2', form=form, image_file=image_file, \
         error=error)
-
-def check_login_valid(username, password):
-
-    '''
-    This function checks the username and password that
-    the user provided (or didn't) against the login
-    credentials stored in passfile.txt.
-
-    Errors are returned for any problems, otherwise the
-    user is successfully logged in.
-
-    The "for row in f" section was adapted from:
-    https://www.itcodar.com/python/
-    python-login-script-usernames-and-passwords-in-a-separate-file.html
-    '''
-
-    error = None
-
-    while True:
-
-        # Username wasn't even provided
-        if not username:
-
-            error = 'Please enter your Username.'
-            break
-
-        # Password wasn't even provided
-        if not password:
-
-            error = 'Please enter your Password.'
-            break
-
-        # Checks to make sure the user exists and, if so,
-        # that the password is correct
-
-        # Open credentials file
-        with open('passfile.txt', "r", encoding="utf-8") as file:
-
-            for row in file:
-
-                # Breaks each row into two items: username and password
-                creds = row.split(",")
-                creds_username = creds[0]
-
-                # Username found
-                if username == creds_username:
-
-                    creds_password = creds[1].strip()
-
-                    if pbkdf2_sha512.verify(password, creds_password):
-
-                        return error
-
-                    error = "Password is incorrect"
-                    return error
-
-            error = "Username not found"
-            break
-
-    return error
-
-def check_complexity(password):
-
-    '''
-    This function runs when the user tries to register and checks
-    that their password is at least 12 characters in length,
-    and includes at least 1 uppercase letter, at least 1 lower case
-    letter, at least 1 number, and at least 1 special character.
-    '''
-
-    error = None
-
-    # This method of checking for special characters adapted from
-    # https://www.knowprogram.com/python/
-    # check-special-character-python/
-
-    special_character_list = re.compile(r"[@_!#$%^&*()<>/\|?}{~:]")
-
-    if len(password) < 12:
-
-        error = "Your password needs to be at least 12 characters."
-
-    elif not any(character.isupper() for character in password):
-
-        error = "Your password must contain at least one uppercase letter."
-
-    elif not any(character.islower() for character in password):
-
-        error = "Your password must contain at least one lowercase letter."
-
-    elif not any(character.isdigit() for character in password):
-
-        error = "Your password must contain at least one digit."
-
-    elif special_character_list.search(password) is None:
-
-        error = "Your password must contain at least one special character."
-
-    return error
 
 @application.route('/logout')
 @login_required
@@ -342,31 +190,6 @@ def links():
 
     return render_template("links.j2")
 
-def check_not_reg(username):
-
-    '''
-    This function checks the credentials file against
-    the username that was provided.  If the username
-    is found then there is already a registered user
-    with that name.
-    '''
-
-    # Open credentials file
-    with open('passfile.txt', "r", encoding="utf-8") as file:
-
-        for row in file:
-
-            # Breaks each row into two items: username and password
-            creds = row.split(",")
-            creds_username = creds[0]
-
-            # Username found (already taken)
-            if username == creds_username:
-
-                return False
-
-    return True
-
 @login_manager.user_loader
 def load_user(user_id):
 
@@ -383,6 +206,45 @@ def load_user(user_id):
 @login_required
 def protected():
     return redirect(url_for('forbidden.html'))
+
+def check_complexity(password):
+
+    '''
+    This function runs when the user tries to register and checks
+    that their password is at least 12 characters in length,
+    and includes at least 1 uppercase letter, at least 1 lower case
+    letter, at least 1 number, and at least 1 special character.
+    '''
+
+    error = None
+
+    # This method of checking for special characters adapted from
+    # https://www.knowprogram.com/python/
+    # check-special-character-python/
+
+    special_character_list = re.compile(r"[@_!#$%^&*()<>/\|?}{~:]")
+
+    if len(password) < 12:
+
+        error = "Your password needs to be at least 12 characters."
+
+    elif not any(character.isupper() for character in password):
+
+        error = "Your password must contain at least one uppercase letter."
+
+    elif not any(character.islower() for character in password):
+
+        error = "Your password must contain at least one lowercase letter."
+
+    elif not any(character.isdigit() for character in password):
+
+        error = "Your password must contain at least one digit."
+
+    elif special_character_list.search(password) is None:
+
+        error = "Your password must contain at least one special character."
+
+    return error
 
 class User(db.Model, UserMixin):
 
