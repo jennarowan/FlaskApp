@@ -12,22 +12,31 @@
     <h3>(Please drink responsibly)</h3>
     <h6>[Or not.  Check Useful Links for a good lawyer if needed.]</h6>
 
-    <!-- Navigation bar to the other pages -->
+    {# <!-- Navigation bar to the other pages -->
     <a href="liquors">Liquors</a> ~ 
     <a href="stores">Stores</a> ~ 
     <a href="links">Useful Links</a> ~ 
-    <a href ="logout">Logout</a>
+    <a href ="logout">Logout</a> #}
 
     <p></p>
 
     <div>
   
-    <a href="{{ url_for('home') }}">Home</a>
-    {% if current_user.is_anonymous %}
-    <a href="{{ url_for('login') }}">Login</a>
+    {# <a href="{{ url_for('home') }}">Home</a> #}
+    {% if not current_user.is_authenticated %}
+
+        <a href="{{ url_for('login') }}">Login</a> ~ 
+        <a href="{{ url_for('register') }}">Register</a>
+
     {% else %}
-    <p>Welcome {{current_user.username}}</p>
-    <a href="{{ url_for('logout') }}">Logout</a>
+
+        <p>Welcome {{current_user.username}}</p>
+
+        <a href="{{ url_for('liquors') }}">Liquors</a> ~ 
+        <a href="{{ url_for('stores') }}">Stores</a> ~ 
+        <a href="{{ url_for('links') }}">Useful Links</a> ~ 
+        <a href="{{ url_for('logout') }}">Logout</a>
+
     {% endif %}
     
     </div>

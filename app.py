@@ -9,11 +9,16 @@ import os
 from datetime import datetime
 from forms import RegistrationForm,LoginForm
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, login_user, current_user, \
+    logout_user, login_required
 from passlib.hash import pbkdf2_sha512
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, flash
 
 application = Flask(__name__)
+
+@application.before_first_request
+def create_tables():
+    db.create_all()
 
 # This section of code lets the webpages load new content without
 # needing to restart the server
@@ -42,7 +47,7 @@ if __name__ == "__main__":
     application.run(debug=True, host='0.0.0.0')
 
 @application.route('/')
-def root():
+def home():
 
     '''
     This function renders the guest home page.
@@ -56,20 +61,20 @@ def root():
     # Grabs our homepage image to be rendered
     image_file = url_for('static', filename="liquor.jpg")
     return render_template("home.j2", image_file=image_file, \
-        datetime = str(datetime.now()))
+        datetime = str(datetime.now()), current_user=current_user)
 
-@application.route('/home')
-def home():
+# @application.route('/home')
+# def home():
 
-    '''
-    This function renders the actual home page after the user
-    has registered or logged in.
-    '''
+#     '''
+#     This function renders the actual home page after the user
+#     has registered or logged in.
+#     '''
 
-    # Grabs our homepage image to be rendered
-    image_file = url_for('static', filename="liquor.jpg")
-    return render_template("home.j2", image_file=image_file, \
-        datetime = str(datetime.now()))
+#     # Grabs our homepage image to be rendered
+#     image_file = url_for('static', filename="liquor.jpg")
+#     return render_template("home.j2", image_file=image_file, \
+#         datetime = str(datetime.now()))
 
 @application.route('/register', methods=['GET', 'POST'])
 
@@ -303,15 +308,17 @@ def check_complexity(password):
     return error
 
 @application.route('/logout')
+@login_required
 def logout():
 
     '''
     This function returns the user to the guest home page.
     '''
-
+    logout_user()
     return redirect('/')
 
 @application.route('/liquors')
+@login_required
 def liquors():
 
     '''
@@ -321,6 +328,7 @@ def liquors():
     return render_template("liquors.j2")
 
 @application.route('/stores')
+@login_required
 def stores():
 
     '''
@@ -330,6 +338,7 @@ def stores():
     return render_template("stores.j2")
 
 @application.route('/links')
+@login_required
 def links():
 
     '''
@@ -370,10 +379,17 @@ def load_user(user_id):
     This function is used by the login_manager to
     fetch the current user id.
     '''
+    try:
+        return User.query.get(int(user_id))
+    except:
+        return None
 
-    return User.get(user_id)
+@application.route("/forbidden",methods=['GET', 'POST'])
+@login_required
+def protected():
+    return redirect(url_for('forbidden.html'))
 
-class User(UserMixin, db.Model):
+class User(db.Model, UserMixin):
 
     '''
     This class builds objects for registered users with
@@ -381,15 +397,33 @@ class User(UserMixin, db.Model):
     the user registered.
     '''
 
-    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), index=True, unique=True)
     email = db.Column(db.String(150), unique = True, index = True)
     password_hash = db.Column(db.String(150))
     joined_at = db.Column(db.DateTime(), default = datetime.utcnow, \
         index = True)
 
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.user_id
+
+    def get(self, id):
+        return self.user_id
+
     def set_password(self, password):
         self.password_hash = pbkdf2_sha512.hash(password)
 
     def check_password(self,password):
         return pbkdf2_sha512.verify(password, self.password_hash)
+
+    def get(self):
+        return id
