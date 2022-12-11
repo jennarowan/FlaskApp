@@ -5,16 +5,37 @@ SDEV 300
 '''
 
 import re
+import os
 from datetime import datetime
+from forms import RegistrationForm,LoginForm
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin
 from passlib.hash import pbkdf2_sha512
 from flask import Flask, render_template, url_for, redirect, request
 
 application = Flask(__name__)
+
+# This section of code lets the webpages load new content without
+# needing to restart the server
 config = {
     "DEBUG": True  # run app in debug mode
 }
 application.jinja_env.auto_reload = True
 application.config['TEMPLATES_AUTO_RELOAD'] = True
+
+# This section (and others) are designed to use a database for user
+# registration and login, after I got dinged on Lab 7 because my
+# routes were open to non-logged in users.
+# Adapted from https://betterprogramming.pub/
+# a-detailed-guide-to-user-registration-login-and-logout-in-flask-e86535665c07
+
+application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb.db'
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(application)
+SECRET_KEY = os.urandom(32)
+application.config['SECRET_KEY'] = SECRET_KEY
+login_manager = LoginManager()
+login_manager.init_app(application)
 
 if __name__ == "__main__":
 	
@@ -27,9 +48,14 @@ def root():
     This function renders the guest home page.
     '''
 
-    # Grabs our guest homepage image to be rendered
-    image_file = url_for('static', filename="loginreq.png")
-    return render_template("index.j2", image_file=image_file, \
+    # # Grabs our guest homepage image to be rendered
+    # image_file = url_for('static', filename="loginreq.png")
+    # return render_template("index.j2", image_file=image_file, \
+    #     datetime = str(datetime.now()))
+
+    # Grabs our homepage image to be rendered
+    image_file = url_for('static', filename="liquor.jpg")
+    return render_template("home.j2", image_file=image_file, \
         datetime = str(datetime.now()))
 
 @application.route('/home')
@@ -46,6 +72,7 @@ def home():
         datetime = str(datetime.now()))
 
 @application.route('/register', methods=['GET', 'POST'])
+
 def register():
 
     '''
@@ -55,64 +82,82 @@ def register():
     # Relevant
     image_file = url_for('static', filename="password_strength.png")
 
-    if request.method == 'GET':
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username =form.username.data, email = form.email.data)
+        user.set_password(form.password1.data)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.j2', form=form, image_file=image_file)
 
-        return render_template('register.j2', image_file=image_file)
+# def register():
 
-    error = None
+#     '''
+#     This function renders the user registration page.
+#     '''
 
-    if request.method == 'POST':
+#     # Relevant
+#     image_file = url_for('static', filename="password_strength.png")
 
-        # Grabs the data the user filled in
-        username = request.form['username']
-        password = request.form['password']
-        passwordtwo = request.form['passwordtwo']
+#     if request.method == 'GET':
 
-        # Finds common errors, sasses user
-        if not username:
+#         return render_template('register.j2', image_file=image_file)
 
-            error = 'Please enter your Username.'
+#     error = None
 
-        elif not password:
+#     if request.method == 'POST':
 
-            error = 'Please enter your Password.'
+#         # Grabs the data the user filled in
+#         username = request.form['username']
+#         password = request.form['password']
+#         passwordtwo = request.form['passwordtwo']
 
-        elif not passwordtwo:
+#         # Finds common errors, sasses user
+#         if not username:
 
-            error = "Both password fields must be filled out."
+#             error = 'Please enter your Username.'
 
-        elif password != passwordtwo:
+#         elif not password:
 
-            error = "Passwords do not match."
+#             error = 'Please enter your Password.'
 
-        # Determines if username is taken already with subsidiary function
-        elif not check_not_reg(username):
+#         elif not passwordtwo:
 
-            error = 'This username is taken.'
+#             error = "Both password fields must be filled out."
 
-        # Determines password matches complexity requirements with subsidiary
-        # function
-        else:
+#         elif password != passwordtwo:
 
-            error = check_complexity(password)
+#             error = "Passwords do not match."
 
-        # They get to try again
-        if error:
+#         # Determines if username is taken already with subsidiary function
+#         elif not check_not_reg(username):
 
-            return render_template('register.j2', error=error, \
-                image_file=image_file)
+#             error = 'This username is taken.'
 
-    # Success
+#         # Determines password matches complexity requirements with subsidiary
+#         # function
+#         else:
 
-    # Hash the password
-    password = pbkdf2_sha512.hash(password)
+#             error = check_complexity(password)
 
-    # Open credentials file and write the username and password
-    with open('passfile.txt', "a", encoding="utf-8") as file:
+#         # They get to try again
+#         if error:
 
-        file.writelines(f"\n{username},{password}")
+#             return render_template('register.j2', error=error, \
+#                 image_file=image_file)
 
-    return redirect(url_for('home'))
+#     # Success
+
+#     # Hash the password
+#     password = pbkdf2_sha512.hash(password)
+
+#     # Open credentials file and write the username and password
+#     with open('passfile.txt', "a", encoding="utf-8") as file:
+
+#         file.writelines(f"\n{username},{password}")
+
+#     return redirect(url_for('home'))
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -125,28 +170,38 @@ def login():
     # when trying to remember my password
     image_file = url_for('static', filename="i-forgot.jpg")
 
-    if request.method == 'GET':
+    # if request.method == 'GET':
 
-        return render_template('login.j2', image_file=image_file)
+    #     return render_template('login.j2', image_file=image_file)
 
-    if request.method == 'POST':
+    # if request.method == 'POST':
 
-        # Grabs the data the user filled in
-        username = request.form['username']
-        password = request.form['password']
+    #     # Grabs the data the user filled in
+    #     username = request.form['username']
+    #     password = request.form['password']
 
-        # Checks to ensure that the login credentials are valid
-        # with subsidiary function
-        error = check_login_valid(username, password)
+    #     # Checks to ensure that the login credentials are valid
+    #     # with subsidiary function
+    #     error = check_login_valid(username, password)
 
-        # They get to try again
-        if error:
+    #     # They get to try again
+    #     if error:
 
-            return render_template('login.j2', image_file=image_file, \
-                error=error)
+    #         return render_template('login.j2', image_file=image_file, \
+    #             error=error)
 
-    # Success
-    return redirect(url_for('home'))
+    # # Success
+    # return redirect(url_for('home'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email = form.email.data).first()
+        if user is not None and user.check_password(form.password.data):
+            login_user(user)
+            next = request.args.get("next")
+            return redirect(next or url_for('home'))
+        flash('Invalid email address or Password.')    
+    return render_template('login.j2', form=form, image_file=image_file)
 
 def check_login_valid(username, password):
 
@@ -307,3 +362,34 @@ def check_not_reg(username):
                 return False
 
     return True
+
+@login_manager.user_loader
+def load_user(user_id):
+
+    '''
+    This function is used by the login_manager to
+    fetch the current user id.
+    '''
+
+    return User.get(user_id)
+
+class User(UserMixin, db.Model):
+
+    '''
+    This class builds objects for registered users with
+    a user id, username, email, hashed password, and when
+    the user registered.
+    '''
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), index=True, unique=True)
+    email = db.Column(db.String(150), unique = True, index = True)
+    password_hash = db.Column(db.String(150))
+    joined_at = db.Column(db.DateTime(), default = datetime.utcnow, \
+        index = True)
+
+    def set_password(self, password):
+        self.password_hash = pbkdf2_sha512.hash(password)
+
+    def check_password(self,password):
+        return pbkdf2_sha512.verify(password, self.password_hash)
