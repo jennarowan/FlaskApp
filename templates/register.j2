@@ -16,22 +16,12 @@
 
     <p></p>
 
-    {# <form method="post">
-
-        <input type="text" placeholder="Username" name="username" value="{{
-            request.form.username }}"><br><br>
-        <input type="password" placeholder="Password" name="password" value="{{
-            request.form.password }}"><br><br>
-        <input type="password" placeholder="Reenter Password" name="passwordtwo" value="{{
-            request.form.passwordtwo }}"><br><br>
-
-        <input class="btn btn-default" type="submit" value="Register">
-
-    </form> #}
-
     <form action="" method="post">
+
         {{ form.hidden_tag() }}
+
         <div>
+
             {{ form.username(placeholder="username",
             style='width: 50%;
             font-weight: bold;
@@ -40,26 +30,18 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box') }}
+
             {% for error in form.username.errors %}
-            <p>{{ error }}</p>
+
+                <p>{{ error }}</p>
+
             {% endfor %}
+
         </div>
+
         <br>
         <div>
-            {{ form.email(placeholder="email",
-            style='width: 50%;
-            font-weight: bold;
-            padding: 12px 20px ;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box') }}
-            {% for error in form.email.errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        <br>
-        <div>
+
             {{ form.password1(placeholder="password",
             style='width: 50%;
             font-weight: bold;
@@ -68,12 +50,19 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box') }}
+
             {% for error in form.password1.errors %}
-            <p>{{ error }}</p>
+
+                <p>{{ error }}</p>
+
             {% endfor %}
+
         </div>
+
         <br>
+
         <div>
+
             {{ form.password2(placeholder="Confirm password",
             style='width: 50%;
             font-weight: bold;
@@ -82,12 +71,20 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box') }}
+
             {% for error in form.password2.errors %}
-            <p>{{ error }}</p>
+
+                <p>{{ error }}</p>
+
             {% endfor %}
+
         </div>
+
         <br>
-        <div>{{ form.submit(
+
+        <div>
+        
+            {{ form.submit(
             style ='background-color: #4CAF50;
             color: white;
             width: 50%;
@@ -95,7 +92,9 @@
             margin: 8px 0;
             border: none;
             border-radius: 4px') }}
+
         </div>
+
     </form>
 
     {% if error %}

@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, current_user, \
     logout_user, login_required
 from passlib.hash import pbkdf2_sha512
-from flask import Flask, render_template, url_for, redirect, request, flash
+from flask import Flask, render_template, url_for, redirect, request
 
 application = Flask(__name__)
 
@@ -22,6 +22,7 @@ def create_tables():
 
 # This section of code lets the webpages load new content without
 # needing to restart the server
+# It works for the templates, but not for the code in this file
 config = {
     "DEBUG": True  # run app in debug mode
 }
@@ -33,6 +34,8 @@ application.config['TEMPLATES_AUTO_RELOAD'] = True
 # routes were open to non-logged in users.
 # Adapted from https://betterprogramming.pub/
 # a-detailed-guide-to-user-registration-login-and-logout-in-flask-e86535665c07
+# (As well as several other tutorials and Stack Overflow posts I had to turn
+# to in order to get this working)
 
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb.db'
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -53,7 +56,8 @@ def home():
     This function renders the home page.
     '''
 
-    # Grabs our homepage images to be rendered
+    # Grabs our homepage images to be rendered, based on whether
+    # the user is logged in or not
     image_file_logged_in = url_for('static', filename="liquor.jpg")
     image_file_not_logged_in = url_for('static', filename="loginreq.png")
 
@@ -74,13 +78,26 @@ def register():
     image_file = url_for('static', filename="password_strength.png")
 
     form = RegistrationForm()
+    error = None
+
     if form.validate_on_submit():
-        user = User(username =form.username.data, email = form.email.data)
+
+        # Grabs the information the user entered
+        user = User(username = form.username.data)
         user.set_password(form.password1.data)
+
+        # Adds it to the database
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for('login'))
-    return render_template('register.j2', form=form, image_file=image_file)
+
+        # Logs the user in and returns them to the newly wide open
+        # homepage
+        login_user(user)
+        next = request.args.get("next")
+        return redirect(next or url_for('home'))
+
+    return render_template('register.j2', form=form, image_file=image_file, \
+        error=error)
 
 # def register():
 
@@ -161,38 +178,30 @@ def login():
     # when trying to remember my password
     image_file = url_for('static', filename="i-forgot.jpg")
 
-    # if request.method == 'GET':
-
-    #     return render_template('login.j2', image_file=image_file)
-
-    # if request.method == 'POST':
-
-    #     # Grabs the data the user filled in
-    #     username = request.form['username']
-    #     password = request.form['password']
-
-    #     # Checks to ensure that the login credentials are valid
-    #     # with subsidiary function
-    #     error = check_login_valid(username, password)
-
-    #     # They get to try again
-    #     if error:
-
-    #         return render_template('login.j2', image_file=image_file, \
-    #             error=error)
-
-    # # Success
-    # return redirect(url_for('home'))
+    error = None
 
     form = LoginForm()
+
     if form.validate_on_submit():
-        user = User.query.filter_by(email = form.email.data).first()
+
+        user = User.query.filter_by(username = form.username.data).first()
+
+        # Once user enters login info (and it is valid) this returns
+        # them to the homepage, with all hidden routes and items
+        # now open to them.
         if user is not None and user.check_password(form.password.data):
+
             login_user(user)
             next = request.args.get("next")
             return redirect(next or url_for('home'))
-        flash('Invalid email address or Password.')    
-    return render_template('login.j2', form=form, image_file=image_file)
+
+        # User failed to provide correct information
+        # We log the date, time, and IP address of the user so that
+        # potential malicious actors can be traced.
+        error = "Invalid username or password."
+
+    return render_template('login.j2', form=form, image_file=image_file, \
+        error=error)
 
 def check_login_valid(username, password):
 
@@ -385,7 +394,6 @@ class User(db.Model, UserMixin):
 
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), index=True, unique=True)
-    email = db.Column(db.String(150), unique = True, index = True)
     password_hash = db.Column(db.String(150))
     joined_at = db.Column(db.DateTime(), default = datetime.utcnow, \
         index = True)
@@ -402,7 +410,7 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return self.user_id
 
-    def get(self, id):
+    def get(self):
         return self.user_id
 
     def set_password(self, password):
@@ -410,6 +418,3 @@ class User(db.Model, UserMixin):
 
     def check_password(self,password):
         return pbkdf2_sha512.verify(password, self.password_hash)
-
-    def get(self):
-        return id

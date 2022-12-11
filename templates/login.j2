@@ -24,7 +24,7 @@
 
         <div>
 
-            {{ form.email(placeholder="email",
+            {{ form.username(placeholder="username",
             style='width: 50%;
             font-weight: bold;
             padding: 12px 20px ;
@@ -33,7 +33,7 @@
             border-radius: 4px;
             box-sizing: border-box') }}
 
-            {% for error in form.email.errors %}
+            {% for error in form.username.errors %}
 
                 <p>{{ error }}</p>
 
@@ -83,11 +83,11 @@
         
     {% endif %}
 
-    {% for message in get_flashed_messages() %}
+    {# {% for message in get_flashed_messages() %}
 
         <p style="color: red;">Error : {{ message }}</p>
         
-    {% endfor %}
+    {% endfor %} #}
 
     <p></p>
 
