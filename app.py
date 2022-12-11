@@ -50,31 +50,17 @@ if __name__ == "__main__":
 def home():
 
     '''
-    This function renders the guest home page.
+    This function renders the home page.
     '''
 
-    # # Grabs our guest homepage image to be rendered
-    # image_file = url_for('static', filename="loginreq.png")
-    # return render_template("index.j2", image_file=image_file, \
-    #     datetime = str(datetime.now()))
+    # Grabs our homepage images to be rendered
+    image_file_logged_in = url_for('static', filename="liquor.jpg")
+    image_file_not_logged_in = url_for('static', filename="loginreq.png")
 
-    # Grabs our homepage image to be rendered
-    image_file = url_for('static', filename="liquor.jpg")
-    return render_template("home.j2", image_file=image_file, \
+    return render_template("home.j2", \
+        image_file_logged_in=image_file_logged_in, \
+        image_file_not_logged_in=image_file_not_logged_in, \
         datetime = str(datetime.now()), current_user=current_user)
-
-# @application.route('/home')
-# def home():
-
-#     '''
-#     This function renders the actual home page after the user
-#     has registered or logged in.
-#     '''
-
-#     # Grabs our homepage image to be rendered
-#     image_file = url_for('static', filename="liquor.jpg")
-#     return render_template("home.j2", image_file=image_file, \
-#         datetime = str(datetime.now()))
 
 @application.route('/register', methods=['GET', 'POST'])
 
