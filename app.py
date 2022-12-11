@@ -124,6 +124,7 @@ def login():
     # Grabs an image to be rendered that I was reminded of
     # when trying to remember my password
     image_file = url_for('static', filename="i-forgot.jpg")
+    bad_login_gif = url_for('static', filename="badlogin.gif")
 
     error = None
 
@@ -148,7 +149,7 @@ def login():
         error = "Invalid username or password."
 
     return render_template('login.j2', form=form, image_file=image_file, \
-        error=error)
+        error=error, bad_login_gif=bad_login_gif)
 
 @application.route('/logout')
 @login_required

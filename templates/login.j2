@@ -85,7 +85,15 @@
 
     <p></p>
 
-    <img src={{ image_file }} alt="Passwords, eh?" width="590" height="590">
+    {% if not error %}
+
+        <img src={{ image_file }} alt="Passwords, eh?" width="590" height="590">
+
+    {% else %}
+
+        <img src={{ bad_login_gif }} alt="Access Denied" width="800" height="590">
+
+    {% endif %}
 
 </body>
 
