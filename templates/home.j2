@@ -9,49 +9,41 @@
 
 <body>
     
-
-    {# <!-- Navigation bar to the other pages -->
-    <a href="liquors">Liquors</a> ~ 
-    <a href="stores">Stores</a> ~ 
-    <a href="links">Useful Links</a> ~ 
-    <a href ="logout">Logout</a> #}
-
-    
-
     <div>
   
-    {# <a href="{{ url_for('home') }}">Home</a> #}
-    {% if not current_user.is_authenticated %}
+        {% if not current_user.is_authenticated %}
 
-        <p></p>
+            <p></p>
 
-        <a href="{{ url_for('login') }}">Login</a> ~ 
-        <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('login') }}">Login</a> ~ 
+            <a href="{{ url_for('register') }}">Register</a> ~
+            <a href="https://github.com/jennarowan/FlaskApp">Source Code</a>
 
-        <p></p>
+            <p></p>
 
-        <img src={{ image_file_not_logged_in }} alt="Please log in" width="960" height="590">
+            <img src={{ image_file_not_logged_in }} alt="Please log in" width="960" height="590">
 
-    {% else %}
+        {% else %}
 
-        <p></p>
+            <p></p>
 
-        <h2>Welcome, {{current_user.username}}, to your destination for getting seriously messed up</h2>
-        <h3>(Please drink responsibly)</h3>
-        <h6>[Or not.  Check Useful Links for a good lawyer if needed.]</h6>
+            <h2>Welcome, {{current_user.username}}, to your destination for getting seriously messed up</h2>
+            <h3>(Please drink responsibly)</h3>
+            <h6>[Or not.  Check Useful Links for a good lawyer if needed.]</h6>
 
-        <p></p>
+            <p></p>
 
-        <a href="{{ url_for('liquors') }}">Liquors</a> ~ 
-        <a href="{{ url_for('stores') }}">Stores</a> ~ 
-        <a href="{{ url_for('links') }}">Useful Links</a> ~ 
-        <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('liquors') }}">Liquors</a> ~ 
+            <a href="{{ url_for('stores') }}">Stores</a> ~ 
+            <a href="{{ url_for('links') }}">Useful Links</a> ~ 
+            <a href="{{ url_for('logout') }}">Logout</a> ~
+            <a href="https://github.com/jennarowan/FlaskApp">Source Code</a>
 
-        <p></p>
+            <p></p>
 
-        <img src={{ image_file_logged_in }} alt="Liquor Store" width="960" height="590">
+            <img src={{ image_file_logged_in }} alt="Liquor Store" width="960" height="590">
 
-    {% endif %}
+        {% endif %}
     
     </div>
 
