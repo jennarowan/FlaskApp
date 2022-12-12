@@ -16,6 +16,7 @@ from flask import Flask, render_template, url_for, redirect, request
 
 application = Flask(__name__)
 
+# Creates the database to hold user information
 @application.before_first_request
 def create_tables():
     db.create_all()
@@ -158,6 +159,7 @@ def logout():
     '''
     This function returns the user to the guest home page.
     '''
+
     logout_user()
     return redirect('/')
 
@@ -206,6 +208,13 @@ def load_user(user_id):
 @application.route("/forbidden",methods=['GET', 'POST'])
 @login_required
 def protected():
+
+    '''
+    This function renders a default page when the user
+    tries to access a route that they need to be logged
+    in for (while they are not logged in.)
+    '''
+
     return redirect(url_for('forbidden.html'))
 
 def check_complexity(password):
