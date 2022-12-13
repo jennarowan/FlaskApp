@@ -42,7 +42,7 @@
         <br>
         <div>
 
-            {{ form.password1(placeholder="Password",
+            {{ form.password_1(placeholder="Password",
             style='width: 50%;
             font-weight: bold;
             padding: 12px 20px ;
@@ -51,7 +51,7 @@
             border-radius: 4px;
             box-sizing: border-box') }}
 
-            {% for error in form.password1.errors %}
+            {% for error in form.password_1.errors %}
 
                 <p>{{ error }}</p>
 
@@ -63,7 +63,7 @@
 
         <div>
 
-            {{ form.password2(placeholder="Confirm Password",
+            {{ form.password_2(placeholder="Confirm Password",
             style='width: 50%;
             font-weight: bold;
             padding: 12px 20px ;
@@ -72,7 +72,7 @@
             border-radius: 4px;
             box-sizing: border-box') }}
 
-            {% for error in form.password2.errors %}
+            {% for error in form.password_2.errors %}
 
                 <p>{{ error }}</p>
 
