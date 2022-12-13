@@ -25,4 +25,4 @@ class ResetPasswordForm(FlaskForm):
         [DataRequired()])
     new_password_2 = PasswordField('Confirm New Password', validators = \
         [DataRequired(),EqualTo('new_password_1')])
-    submit = SubmitField('PasswordReset')
+    submit = SubmitField('Reset Password')
