@@ -311,7 +311,7 @@ def log_failed_login():
     '''
 
     cur_time = time.ctime(time.time())
-    ip = request.remote_addr
+    ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
 
     with open("loginFails.log", "a") as file:
 
