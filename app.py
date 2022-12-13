@@ -6,6 +6,7 @@ SDEV 300
 
 import re
 import os
+import time
 from datetime import datetime
 from forms import RegistrationForm,LoginForm,ResetPasswordForm
 from flask_sqlalchemy import SQLAlchemy
@@ -147,6 +148,7 @@ def login():
         # We log the date, time, and IP address of the user so that
         # potential malicious actors can be traced.
         error = "Invalid username or password."
+        log_failed_login()
 
     return render_template('login.j2', form=form, image_file=image_file, \
         error=error, bad_login_gif=bad_login_gif)
@@ -299,6 +301,21 @@ def check_complexity(password):
         error = "Your password must contain at least one special character."
 
     return error
+
+def log_failed_login():
+
+    '''
+    When a user fails to login successfully this function logs
+    the date, time, and IP address of the user in the
+    loginFails.log file
+    '''
+
+    cur_time = time.ctime(time.time())
+    ip = request.remote_addr
+
+    with open("loginFails.log", "a") as file:
+
+        file.write(f"{cur_time} - Failed login attempt from {ip}\n")
 
 class User(db.Model, UserMixin):
 
