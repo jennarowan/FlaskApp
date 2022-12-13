@@ -5,9 +5,9 @@ from wtforms.validators import DataRequired,EqualTo
 class RegistrationForm(FlaskForm):
 
     username = StringField('username', validators =[DataRequired()])
-    password1 = PasswordField('Password', validators = [DataRequired()])
-    password2 = PasswordField('Confirm Password', validators = \
-        [DataRequired(),EqualTo('password1')])
+    password_1 = PasswordField('Password', validators = [DataRequired()])
+    password_2 = PasswordField('Confirm Password', validators = \
+        [DataRequired(),EqualTo('password_1')])
     submit = SubmitField('Register')
 
 class LoginForm(FlaskForm):
@@ -16,3 +16,13 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class ResetPasswordForm(FlaskForm):
+
+    existing_password = PasswordField('Current Password', validators = \
+        [DataRequired()])
+    new_password_1 = PasswordField('New Password', validators = \
+        [DataRequired()])
+    new_password_2 = PasswordField('Confirm New Password', validators = \
+        [DataRequired(),EqualTo('new_password_1')])
+    submit = SubmitField('PasswordReset')

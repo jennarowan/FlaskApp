@@ -7,7 +7,7 @@ SDEV 300
 import re
 import os
 from datetime import datetime
-from forms import RegistrationForm,LoginForm
+from forms import RegistrationForm,LoginForm,ResetPasswordForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, current_user, \
     logout_user, login_required
@@ -68,7 +68,6 @@ def home():
         datetime = str(datetime.now()), current_user=current_user)
 
 @application.route('/register', methods=['GET', 'POST'])
-
 def register():
 
     '''
@@ -94,13 +93,13 @@ def register():
         else:
 
             # Checks validity of password
-            error = check_complexity(form.password1.data)
+            error = check_complexity(form.password_1.data)
 
             if not error:
 
                 # Grabs the information the user entered
                 user = User(username = form.username.data)
-                user.set_password(form.password1.data)
+                user.set_password(form.password_1.data)
 
                 # Adds it to the database
                 db.session.add(user)
@@ -151,6 +150,46 @@ def login():
 
     return render_template('login.j2', form=form, image_file=image_file, \
         error=error, bad_login_gif=bad_login_gif)
+
+@application.route('/passwordreset', methods=['GET', 'POST'])
+def password_reset():
+
+    '''
+    This function renders the password reset page.
+    '''
+
+    # Grabs an image to be rendered that I was reminded of
+    # when trying to remember my password
+    image_file = url_for('static', filename="passwordreset.gif")
+
+    error = None
+
+    form = ResetPasswordForm()
+
+    if form.validate_on_submit():
+
+        user = User.query.filter_by(current_user.get_username()).first()
+
+        # Checks that user entered the correct password 
+        # they are currently using
+        if user.check_password(form.existing_password.data):
+
+            # Checks proposed new password for adherence
+            # to complexity requirements
+            error = check_complexity(form.new_password_1.data)
+
+            if not error:
+
+                # Grabs the information the user entered
+                user.set_password(form.new_password_1.data)
+
+                # Adds it to the database
+                db.session.commit()
+
+                return redirect(url_for('home'))
+
+    return render_template('passworedreset.j2', form=form, \
+        image_file=image_file, error=error)
 
 @application.route('/logout')
 @login_required
@@ -284,6 +323,9 @@ class User(db.Model, UserMixin):
 
     def get(self):
         return self.user_id
+
+    def get_username(self):
+        return self.username
 
     def set_password(self, password):
         self.password_hash = pbkdf2_sha512.hash(password)
