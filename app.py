@@ -56,7 +56,7 @@ def home():
     '''
     This function renders the home page.
     '''
-
+    
     # Grabs our homepage images to be rendered, based on whether
     # the user is logged in or not
     image_file_logged_in = url_for('static', filename="liquor.jpg")
@@ -168,7 +168,8 @@ def password_reset():
 
     if form.validate_on_submit():
 
-        user = User.query.filter_by(current_user.get_username()).first()
+        user = User.query.filter_by(username = \
+            current_user.get_username()).first()
 
         # Checks that user entered the correct password 
         # they are currently using
@@ -188,7 +189,11 @@ def password_reset():
 
                 return redirect(url_for('home'))
 
-    return render_template('passworedreset.j2', form=form, \
+        else:
+
+            error = "Invalid current password"
+
+    return render_template('passwordreset.j2', form=form, \
         image_file=image_file, error=error)
 
 @application.route('/logout')
