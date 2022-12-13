@@ -8,18 +8,23 @@ import re
 import os
 import time
 from datetime import datetime
-from forms import RegistrationForm,LoginForm,ResetPasswordForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, current_user, \
     logout_user, login_required
 from passlib.hash import pbkdf2_sha512
 from flask import Flask, render_template, url_for, redirect, request
+from forms import RegistrationForm,LoginForm,ResetPasswordForm
 
 application = Flask(__name__)
 
 # Creates the database to hold user information
 @application.before_first_request
 def create_tables():
+
+    '''
+    This function ensures the database is created.
+    '''
+
     db.create_all()
 
 # This section of code lets the webpages load new content without
@@ -48,7 +53,7 @@ login_manager = LoginManager()
 login_manager.init_app(application)
 
 if __name__ == "__main__":
-	
+
     application.run(debug=True, host='0.0.0.0')
 
 @application.route('/')
@@ -57,7 +62,7 @@ def home():
     '''
     This function renders the home page.
     '''
-    
+
     # Grabs our homepage images to be rendered, based on whether
     # the user is logged in or not
     image_file_logged_in = url_for('static', filename="liquor.jpg")
@@ -109,8 +114,7 @@ def register():
                 # Logs the user in and returns them to the newly wide open
                 # homepage
                 login_user(user)
-                next = request.args.get("next")
-                return redirect(next or url_for('home'))
+                return redirect(url_for('home'))
 
     return render_template('register.j2', form=form, image_file=image_file, \
         error=error)
@@ -141,8 +145,7 @@ def login():
         if user is not None and user.check_password(form.password.data):
 
             login_user(user)
-            next = request.args.get("next")
-            return redirect(next or url_for('home'))
+            return redirect(url_for('home'))
 
         # User failed to provide correct information
         # We log the date, time, and IP address of the user so that
@@ -180,7 +183,7 @@ def password_reset():
             user = User.query.filter_by(username = \
                 current_user.get_username()).first()
 
-            # Checks that user entered the correct password 
+            # Checks that user entered the correct password
             # they are currently using
             if user.check_password(form.existing_password.data):
 
@@ -256,8 +259,11 @@ def load_user(user_id):
     fetch the current user id.
     '''
     try:
+
         return User.query.get(int(user_id))
-    except:
+
+    except ValueError:
+
         return None
 
 @application.route("/forbidden",methods=['GET', 'POST'])
@@ -292,10 +298,10 @@ def check_complexity(password):
     # (12+ length, 1+ uppercase, 1+ lowercase, 1+ special char)
     # This check is therefore completely redundant
 
-    with open("CommonPasswords", "r") as file:
+    with open("CommonPasswords", "r", encoding="utf-8") as file:
 
         for row in file:
-            
+
             if row.strip() == password:
 
                 return "This password is one that is commonly used.  Please " \
@@ -338,11 +344,11 @@ def log_failed_login():
     '''
 
     cur_time = time.ctime(time.time())
-    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    ip_addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 
-    with open("loginfails.log", "a") as file:
+    with open("loginfails.log", "a", encoding="utf-8") as file:
 
-        file.write(f"{cur_time} - Failed login attempt from {ip}\n")
+        file.write(f"{cur_time} - Failed login attempt from {ip_addr}\n")
 
 class User(db.Model, UserMixin):
 
@@ -357,32 +363,9 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(150))
     joined_at = db.Column(db.DateTime(), default = datetime.utcnow, \
         index = True)
-
-    def is_authenticated(self):
-
-        '''
-        This function confirms that the current session
-        user is legit.
-        '''
-
-        return True
-
-    def is_active(self):
-
-        '''
-        I'm honestly not 100% sure on what this is used for.
-        '''
-
-        return True
-
-    def is_anonymous(self):
-
-        '''
-        This function determines if the current
-        session user is logged in or not.
-        '''
-
-        return False
+    is_authenticated = True
+    is_active = True
+    is_anonymous = False
 
     def get_id(self):
 
