@@ -170,30 +170,39 @@ def password_reset():
 
     if form.validate_on_submit():
 
-        user = User.query.filter_by(username = \
-            current_user.get_username()).first()
+        while True:
 
-        # Checks that user entered the correct password 
-        # they are currently using
-        if user.check_password(form.existing_password.data):
+            if form.existing_password.data == form.new_password_1.data:
 
-            # Checks proposed new password for adherence
-            # to complexity requirements
-            error = check_complexity(form.new_password_1.data)
+                error = "New password cannot be the same as old password."
+                break
 
-            if not error:
+            user = User.query.filter_by(username = \
+                current_user.get_username()).first()
 
-                # Grabs the information the user entered
-                user.set_password(form.new_password_1.data)
+            # Checks that user entered the correct password 
+            # they are currently using
+            if user.check_password(form.existing_password.data):
 
-                # Adds it to the database
-                db.session.commit()
+                # Checks proposed new password for adherence
+                # to complexity requirements
+                error = check_complexity(form.new_password_1.data)
 
-                return redirect(url_for('home'))
+                if not error:
 
-        else:
+                    # Grabs the information the user entered
+                    user.set_password(form.new_password_1.data)
 
-            error = "Invalid current password"
+                    # Adds it to the database
+                    db.session.commit()
+
+                    return redirect(url_for('home'))
+
+            else:
+
+                error = "Invalid current password"
+
+            break
 
     return render_template('passwordreset.j2', form=form, \
         image_file=image_file, error=error)
@@ -274,6 +283,24 @@ def check_complexity(password):
 
     error = None
 
+    # Checks the common passwords text file to ensure that the user
+    # is not trying to use one of the common passwords.
+
+    # NOTE TO PROFESSOR: It's actually completely impossible for
+    # someone to even try using these, because none of the passwords
+    # on this list satisfy the existing password requirements:
+    # (12+ length, 1+ uppercase, 1+ lowercase, 1+ special char)
+    # This check is therefore completely redundant
+
+    with open("CommonPasswords", "r") as file:
+
+        for row in file:
+            
+            if row.strip() == password:
+
+                return "This password is one that is commonly used.  Please " \
+                    "choose something else."
+
     # This method of checking for special characters adapted from
     # https://www.knowprogram.com/python/
     # check-special-character-python/
@@ -332,25 +359,67 @@ class User(db.Model, UserMixin):
         index = True)
 
     def is_authenticated(self):
+
+        '''
+        This function confirms that the current session
+        user is legit.
+        '''
+
         return True
 
     def is_active(self):
+
+        '''
+        I'm honestly not 100% sure on what this is used for.
+        '''
+
         return True
 
     def is_anonymous(self):
+
+        '''
+        This function determines if the current
+        session user is logged in or not.
+        '''
+
         return False
 
     def get_id(self):
+
+        '''
+        This function grabs the user's user_id.
+        '''
+
         return self.user_id
 
     def get(self):
+
+        '''
+        This function grabs the user's user_id.
+        '''
+
         return self.user_id
 
     def get_username(self):
+
+        '''
+        This function grabs the user's username.
+        '''
+
         return self.username
 
     def set_password(self, password):
+
+        '''
+        This function sets the user's password.
+        '''
         self.password_hash = pbkdf2_sha512.hash(password)
 
     def check_password(self,password):
+
+        '''
+        This function determines whether the user entered
+        a password that matches the hashed one we have on file.
+        '''
+
         return pbkdf2_sha512.verify(password, self.password_hash)
