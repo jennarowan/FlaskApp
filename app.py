@@ -88,33 +88,44 @@ def register():
 
     if form.validate_on_submit():
 
-        # Checks to ensure username is not taken
-        exists = User.query.filter_by(username = form.username.data).first() \
-            is not None
+        while True:
 
-        if exists:
+            if form.username.data == "" or \
+                form.password_1.data == "" or \
+                form.password_2.data == "":
 
-            error = "This username is already taken"
+                error = "All fields must be filled out."
+                break
 
-        else:
+            # Checks to ensure username is not taken
+            exists = User.query.filter_by(username = \
+                form.username.data).first() is not None
 
-            # Checks validity of password
-            error = check_complexity(form.password_1.data)
+            if exists:
 
-            if not error:
+                error = "This username is already taken"
 
-                # Grabs the information the user entered
-                user = User(username = form.username.data)
-                user.set_password(form.password_1.data)
+            else:
 
-                # Adds it to the database
-                db.session.add(user)
-                db.session.commit()
+                # Checks validity of password
+                error = check_complexity(form.password_1.data)
 
-                # Logs the user in and returns them to the newly wide open
-                # homepage
-                login_user(user)
-                return redirect(url_for('home'))
+                if not error:
+
+                    # Grabs the information the user entered
+                    user = User(username = form.username.data)
+                    user.set_password(form.password_1.data)
+
+                    # Adds it to the database
+                    db.session.add(user)
+                    db.session.commit()
+
+                    # Logs the user in and returns them to the newly wide open
+                    # homepage
+                    login_user(user)
+                    return redirect(url_for('home'))
+
+            break
 
     return render_template('register.j2', form=form, image_file=image_file, \
         error=error)
@@ -137,21 +148,30 @@ def login():
 
     if form.validate_on_submit():
 
-        user = User.query.filter_by(username = form.username.data).first()
+        while True:
 
-        # Once user enters login info (and it is valid) this returns
-        # them to the homepage, with all hidden routes and items
-        # now open to them.
-        if user is not None and user.check_password(form.password.data):
+            if form.username.data == "" or \
+                form.password.data == "":
 
-            login_user(user)
-            return redirect(url_for('home'))
+                error = "All fields must be filled out."
+                break
 
-        # User failed to provide correct information
-        # We log the date, time, and IP address of the user so that
-        # potential malicious actors can be traced.
-        error = "Invalid username or password."
-        log_failed_login()
+            user = User.query.filter_by(username = form.username.data).first()
+
+            # Once user enters login info (and it is valid) this returns
+            # them to the homepage, with all hidden routes and items
+            # now open to them.
+            if user is not None and user.check_password(form.password.data):
+
+                login_user(user)
+                return redirect(url_for('home'))
+
+            # User failed to provide correct information
+            # We log the date, time, and IP address of the user so that
+            # potential malicious actors can be traced.
+            error = "Invalid username or password."
+            log_failed_login()
+            break
 
     return render_template('login.j2', form=form, image_file=image_file, \
         error=error, bad_login_gif=bad_login_gif)
@@ -174,6 +194,13 @@ def password_reset():
     if form.validate_on_submit():
 
         while True:
+
+            if form.existing_password.data == "" or \
+                form.new_password_1 == "" or \
+                form.new_password_2 == "":
+
+                error = "All fields must be filled in."
+                break
 
             if form.existing_password.data == form.new_password_1.data:
 

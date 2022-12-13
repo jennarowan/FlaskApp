@@ -12,10 +12,10 @@ class RegistrationForm(FlaskForm):
     This is the registration form for new users.
     '''
 
-    username = StringField('username', validators =[DataRequired()])
-    password_1 = PasswordField('Password', validators = [DataRequired()])
+    username = StringField('username')
+    password_1 = PasswordField('Password')
     password_2 = PasswordField('Confirm Password', validators = \
-        [DataRequired(),EqualTo('password_1')])
+        [EqualTo('password_1')])
     submit = SubmitField('Register')
 
 class LoginForm(FlaskForm):
@@ -24,8 +24,8 @@ class LoginForm(FlaskForm):
     This is the login form for existing users.
     '''
 
-    username = StringField('Username',validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username')
+    password = PasswordField('Password')
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
@@ -35,10 +35,8 @@ class ResetPasswordForm(FlaskForm):
     This form allows an existing user to change their password.
     '''
 
-    existing_password = PasswordField('Current Password', validators = \
-        [DataRequired()])
-    new_password_1 = PasswordField('New Password', validators = \
-        [DataRequired()])
+    existing_password = PasswordField('Current Password')
+    new_password_1 = PasswordField('New Password')
     new_password_2 = PasswordField('Confirm New Password', validators = \
-        [DataRequired(),EqualTo('new_password_1')])
+        [EqualTo('new_password_1')])
     submit = SubmitField('Reset Password')
