@@ -1,6 +1,4 @@
-This is a school project for SDEV 300 at UMGC.  
-
-The goal is to build a simple Flask app that features user registration, login, password update, and logout features.  
+This is a project to build a simple Flask app that features user registration, login, password update, and logout features.  
 
 Usernames and passwords are stored in a database, with the passwords hashed in sha512.
 
